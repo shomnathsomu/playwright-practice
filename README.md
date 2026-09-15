@@ -162,13 +162,9 @@ This is an important step toward Senior SQA Engineer-level automation.
 | 90 | Simulate API failure and verify UI behavior | Network mocking  |
 
 Example concept:
-API → Create User
-        ↓
-UI → Login
-        ↓
-UI → Verify User
-        ↓
-API → Verify User Data
+
+<img width="167" height="156" alt="image" src="https://github.com/user-attachments/assets/8a58cdf4-ef1b-494a-b68d-33727ca80d75" />
+
 This is much closer to real-world automation than simply clicking buttons.
 
 ### 🟣 Level 8 — Professional Playwright Framework
@@ -191,30 +187,9 @@ These final 10 aren't just individual UI tests. They're framework-level challeng
 
 
 ### 🧠 The 100-Case Learning Progression
-
 Think of the roadmap like this:
 
-                PLAYWRIGHT
-                    │
-        ┌───────────┴───────────┐
-        │                       │
-   BASIC UI                 TEST DESIGN
-    1–30                     31–60
-        │                       │
-        └───────────┬───────────┘
-                    │
-              ADVANCED UI
-                61–85
-                    │
-             ┌──────┴──────┐
-             │             │
-          API + UI      FRAMEWORK
-           86–90         91–100
-             │             │
-             └──────┬──────┘
-                    ↓
-          PROFESSIONAL PLAYWRIGHT
-
+<img width="288" height="411" alt="image" src="https://github.com/user-attachments/assets/1aa88423-5d59-4000-b84f-6697821ab2b4" />
 
 ## 🏆 100 Cases → Skill Matrix
 
