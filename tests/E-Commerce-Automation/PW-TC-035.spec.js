@@ -1,4 +1,4 @@
-// Practice Test Case #35 — Cart Persistence During Navigation
+// Practice Test Case #35 — Add multiple products — Loops
 
 import { test, expect } from '@playwright/test';
 
@@ -19,74 +19,60 @@ test.beforeEach(async () => {
     test.setTimeout(120_000);
 });
 
-test('Verify cart contents persist during navigation', async ({ page }) => {
+test('TC35 - Add multiple products to cart', async ({ page }) => {
   await page.goto('https://www.saucedemo.com/');
 
   // Login
-  await page.getByRole('textbox', {
-    name: 'Username'
-  }).fill('standard_user');
+  await page.getByRole('textbox', { name: 'Username' })
+    .fill('standard_user');
 
-  await page.getByRole('textbox', {
-    name: 'Password'
-  }).fill('secret_sauce');
+  await page.getByRole('textbox', { name: 'Password' })
+    .fill('secret_sauce');
 
-  await page.getByRole('button', {
-    name: 'Login'
-  }).click();
+  await page.getByRole('button', { name: 'Login' })
+    .click();
 
-  // Verify Inventory page
   await expect(page).toHaveURL(/inventory\.html/);
 
-  // Locate Sauce Labs Backpack
-  const productCard = page.locator('.inventory_item').filter({
-    hasText: 'Sauce Labs Backpack'
-  });
+  // Products to add
+  const productsToAdd = [
+    'Sauce Labs Backpack',
+    'Sauce Labs Bike Light',
+    'Sauce Labs Bolt T-Shirt'
+  ];
 
-  // Add Backpack to cart
-  await productCard.getByRole('button', {
-    name: 'Add to cart'
-  }).click();
+  // Add each product using a loop
+  for (const productName of productsToAdd) {
+    const productCard = page.locator('.inventory_item').filter({
+      hasText: productName
+    });
+
+    await expect(productCard).toBeVisible();
+
+    await productCard.getByRole('button', {
+      name: 'Add to cart'
+    }).click();
+  }
 
   // Verify cart badge
-  const cartBadge = page.locator('.shopping_cart_badge');
+  await expect(
+    page.locator('.shopping_cart_badge')
+  ).toHaveText('3');
 
-  await expect(cartBadge).toHaveText('1');
-
-  // Go to Cart
+  // Open cart
   await page.locator('a.shopping_cart_link').click();
 
   await expect(page).toHaveURL(/cart\.html/);
 
-  // Verify Backpack is in cart
-  await expect(
-    page.getByText('Sauce Labs Backpack', {
-      exact: true
-    })
-  ).toBeVisible();
+  // Verify number of cart items
+  const cartItems = page.locator('.cart_item');
 
-  // Navigate back to Inventory
-  await page.locator('#continue-shopping').click();
+  await expect(cartItems).toHaveCount(3);
 
-  await expect(page).toHaveURL(/inventory\.html/);
-
-  // Verify cart badge still shows 1
-  await expect(cartBadge).toHaveText('1');
-
-  // Go to Cart again
-  await page.locator('a.shopping_cart_link').click();
-
-  await expect(page).toHaveURL(/cart\.html/);
-
-  // Verify Backpack is still in cart
-  await expect(
-    page.getByText('Sauce Labs Backpack', {
-      exact: true
-    })
-  ).toBeVisible();
-
-  // Verify exactly one item exists
-  await expect(
-    page.locator('.cart_item')
-  ).toHaveCount(1);
+  // Verify every selected product is in the cart
+  for (const productName of productsToAdd) {
+    await expect(
+      page.getByText(productName, { exact: true })
+    ).toBeVisible();
+  }
 });
