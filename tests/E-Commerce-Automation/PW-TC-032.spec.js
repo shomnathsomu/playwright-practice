@@ -1,4 +1,4 @@
-// Practice Test Case #32 — Add a Specific Product to Cart
+// Practice Test Case #32 — Verify product names — Text assertions
 
 import { test, expect } from '@playwright/test';
 
@@ -19,53 +19,36 @@ test.beforeEach(async () => {
     test.setTimeout(120_000);
 });
 
-test('Verify specific product can be added to cart', async ({ page }) => {
+
+test('TC32 - Verify product names', async ({ page }) => {
   await page.goto('https://www.saucedemo.com/');
 
   // Login
-  await page.getByRole('textbox', {
-    name: 'Username'
-  }).fill('standard_user');
+  await page.getByRole('textbox', { name: 'Username' }).fill('standard_user');
+  await page.getByRole('textbox', { name: 'Password' }).fill('secret_sauce');
+  await page.getByRole('button', { name: 'Login' }).click();
 
-  await page.getByRole('textbox', {
-    name: 'Password'
-  }).fill('secret_sauce');
-
-  await page.getByRole('button', {
-    name: 'Login'
-  }).click();
-
-  // Verify inventory page
   await expect(page).toHaveURL(/inventory\.html/);
 
-  // Locate Sauce Labs Backpack product card
-  const productCard = page.locator('.inventory_item').filter({
-    hasText: 'Sauce Labs Backpack'
-  });
+  // Expected product names
+  const expectedProducts = [
+    'Sauce Labs Backpack',
+    'Sauce Labs Bike Light',
+    'Sauce Labs Bolt T-Shirt',
+    'Sauce Labs Fleece Jacket',
+    'Sauce Labs Onesie',
+    'Test.allTheThings() T-Shirt (Red)'
+  ];
 
-  // Verify product is displayed
-  await expect(productCard).toBeVisible();
+  // Product-name locator
+  const productNames = page.locator('.inventory_item_name');
 
-  // Click Add to Cart for this specific product
-  await productCard.getByRole('button', {
-    name: 'Add to cart'
-  }).click();
+  // Verify product count
+  await expect(productNames).toHaveCount(expectedProducts.length);
 
-  // Verify cart badge
-  const cartBadge = page.locator('.shopping_cart_badge');
-
-  await expect(cartBadge).toHaveText('1');
-
-  // Open cart
-  await page.locator('#shopping_cart_container').click();
-
-  // Verify cart page
-  await expect(page).toHaveURL(/cart\.html/);
-
-  // Verify correct product is in cart
-  await expect(
-    page.getByText('Sauce Labs Backpack', {
-      exact: true
-    })
-  ).toBeVisible();
+  // Verify each product name
+  for (let i = 0; i < expectedProducts.length; i++) {
+    await expect(productNames.nth(i))
+      .toHaveText(expectedProducts[i]);
+  }
 });
