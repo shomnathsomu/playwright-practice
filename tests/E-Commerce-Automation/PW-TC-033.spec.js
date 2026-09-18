@@ -1,4 +1,4 @@
-// Practice Test Case #33 — Add Multiple Products to Cart
+// Practice Test Case #33 — Verify product prices — Data extraction
 
 import { test, expect } from '@playwright/test';
 
@@ -19,66 +19,36 @@ test.beforeEach(async () => {
     test.setTimeout(120_000);
 });
 
-test('Verify multiple products can be added to cart', async ({ page }) => {
+
+test('TC33 - Verify product prices', async ({ page }) => {
   await page.goto('https://www.saucedemo.com/');
 
   // Login
-  await page.getByRole('textbox', {
-    name: 'Username'
-  }).fill('standard_user');
+  await page.getByRole('textbox', { name: 'Username' }).fill('standard_user');
+  await page.getByRole('textbox', { name: 'Password' }).fill('secret_sauce');
+  await page.getByRole('button', { name: 'Login' }).click();
 
-  await page.getByRole('textbox', {
-    name: 'Password'
-  }).fill('secret_sauce');
-
-  await page.getByRole('button', {
-    name: 'Login'
-  }).click();
-
-  // Verify inventory page
   await expect(page).toHaveURL(/inventory\.html/);
 
-  // Products to add
-  const products = [
-    'Sauce Labs Backpack',
-    'Sauce Labs Bike Light',
-    'Sauce Labs Bolt T-Shirt'
+  // Expected product prices
+  const expectedPrices = [
+    '$29.99',
+    '$9.99',
+    '$15.99',
+    '$49.99',
+    '$7.99',
+    '$15.99'
   ];
 
-  // Add each product
-  for (const productName of products) {
-    const productCard = page.locator('.inventory_item').filter({
-      hasText: productName
-    });
+  // Locate all product prices
+  const priceElements = page.locator('.inventory_item_price');
 
-    await expect(productCard).toBeVisible();
+  // Verify number of prices
+  await expect(priceElements).toHaveCount(expectedPrices.length);
 
-    await productCard.getByRole('button', {
-      name: 'Add to cart'
-    }).click();
+  // Extract and verify each price
+  for (let i = 0; i < expectedPrices.length; i++) {
+    const actualPrice = await priceElements.nth(i).textContent();
+    expect(actualPrice?.trim()).toBe(expectedPrices[i]);
   }
-
-  // Verify cart badge
-  const cartBadge = page.locator('.shopping_cart_badge');
-
-  await expect(cartBadge).toHaveText('3');
-
-  // Open cart
-  await page.locator('a.shopping_cart_link').click();
-
-  await expect(page).toHaveURL(/cart\.html/);
-
-  // Verify selected products are present
-  for (const productName of products) {
-    await expect(
-      page.getByText(productName, {
-        exact: true
-      })
-    ).toBeVisible();
-  }
-
-  // Verify exactly 3 cart items
-  await expect(
-    page.locator('.cart_item')
-  ).toHaveCount(3);
 });
