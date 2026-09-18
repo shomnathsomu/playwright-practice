@@ -1,4 +1,4 @@
-// Practice Test Case #31 — Verify Product Details
+// Practice Test Case #31 — Verify Product List
 
 import { test, expect } from '@playwright/test';
 
@@ -19,7 +19,8 @@ test.beforeEach(async () => {
     test.setTimeout(120_000);
 });
 
-test('Verify selected product information matches product details', async ({ page }) => {
+test('Verify product list', async ({ page }) => {
+  // Open SauceDemo
   await page.goto('https://www.saucedemo.com/');
 
   // Login
@@ -35,31 +36,15 @@ test('Verify selected product information matches product details', async ({ pag
     name: 'Login'
   }).click();
 
-  // Locate product card
-  const productCard = page.locator('.inventory_item').filter({
-    hasText: 'Sauce Labs Backpack'
-  });
+  // Verify Inventory page
+  await expect(page).toHaveURL(/inventory\.html/);
 
-  const productName = productCard.getByText(
-    'Sauce Labs Backpack',
-    { exact: true }
-  );
+  // Locate all product cards
+  const products = page.locator('.inventory_item');
 
-  const productPrice = productCard.locator('.inventory_item_price');
+  // Verify product list contains 6 products
+  await expect(products).toHaveCount(6);
 
-  const productDescription = productCard.locator('.inventory_item_desc').first();
-
-  // Capture inventory information
-  const name = await productName.textContent();
-  const price = await productPrice.textContent();
-  const description = await productDescription.textContent();
-
-  // Open product details
-  await productName.click();
-
-  // Validate details page
-  await expect(page.getByText(name, { exact: true })).toBeVisible();
-  await expect(page.getByText(price, { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', {name: 'Add to cart'})).toBeVisible();
-  await expect(page.getByText(description, { exact: true })).toBeVisible();
+  // Verify product list is visible
+  await expect(products.first()).toBeVisible();
 });
