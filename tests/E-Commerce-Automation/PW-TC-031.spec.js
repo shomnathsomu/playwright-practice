@@ -45,6 +45,10 @@ test('Verify product list', async ({ page }) => {
   // Verify product list contains 6 products
   await expect(products).toHaveCount(6);
 
-  // Verify product list is visible
-  await expect(products.first()).toBeVisible();
+  const count = await products.count();
+
+  // Verify every product card is visible
+  for (let i = 0; i < count; i++) {
+    await expect(products.nth(i)).toBeVisible();
+  }
 });
